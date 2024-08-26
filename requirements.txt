@@ -1,0 +1,9 @@
+Flask
+pytesseract
+opencv-python
+spacy
+pdf2image
+numpy
+gunicorn
+pymupdf
+-e .
