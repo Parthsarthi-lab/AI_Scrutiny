@@ -1,6 +1,7 @@
 from flask import Blueprint,request,jsonify,render_template, redirect, url_for,current_app
 import os
 import fitz # PyMuPDF
+from ..nlp.SLP_scrutinizer import SLP
 
 main = Blueprint('main', __name__)
 
@@ -24,16 +25,15 @@ def upload_files():
     if file3:
         file3.save(os.path.join(current_app.config['UPLOAD_FOLDER'], file3.filename))
 
+    #document = request.files
+    
+    slp_obj = SLP(slp)
     
 
-    # Load the pdf and extract the dimensions for each page
-
-    slp_path = f"uploads/{slp.filename}"
-    slp_doc = fitz.open(slp_path)
-    slp_page_dimensions = [(page.rect.width, page.rect.height) for page in slp_doc]
-
-    print(slp_page_dimensions)
+   
+    
 
 
     return redirect(url_for("main.index"))
+
 

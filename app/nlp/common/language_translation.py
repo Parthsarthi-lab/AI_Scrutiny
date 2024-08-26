@@ -1,9 +1,14 @@
-def check_document_language():
+from langdetect import detect
+
+def check_document_language(document):
     """
     If the language of a document is not in english or certain phrases are not in english
     then we move to the other functions 
     """
-    pass
+    for text in document.text:
+        language = detect(text)
+        return language
+
 
 def check_translated_document_available():
     pass

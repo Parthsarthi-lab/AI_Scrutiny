@@ -13,41 +13,45 @@ class Document:
 
         # File metadata
         self.path = f"uploads/{file.filename}"
-        """self.doc = fitz.open(self.path)
-        self.page_dimensions = [(page.rect.width, page.rect.height) for page in self.doc]"""
+        self.doc = fitz.open(self.path)
+        self.page_dimensions = [(page.rect.width, page.rect.height) for page in self.doc]
+        self.image_paths = convert_pdf_to_images(file.filename,self.path,"images\\")
 
-        self.trigger()
+        #self.trigger()
 
-        """self.image_paths = convert_pdf_to_images(self.path)
+        
         defects_by_page = {}
-
+        self.text = {}
         for page_number, image_path in enumerate(self.image_paths, start=1):
             # Load the image for the current page
-            page_image = cv2.imread(image_path)
+            #page_image = cv2.imread(image_path)
             
             # Perform OCR to extract text from the image
-            text = ocr_process(image_path)"""
+            self.text[page_number] = ocr_process(image_path,file.filename)
+            
+        self.trigger()
+        
 
 
     def trigger(self):
         self.paper_typing_spec()
-        self.language_translation()
-        self.heading_checker()
-        self.adherence_time_limits()
-        self.affidavit_interpretation()
+        #self.language_translation()
+        #self.heading_checker()
+        #self.adherence_time_limits()
+        #self.affidavit_interpretation()
 
     def paper_typing_spec(self):
-        paper_size(self)
-        font(self)
-        font_size(self)
-        spacing(self)
-        margin(self)
-        page_numbering(self)
-        legibility_neatness(self)
+        paper_size_errors = paper_size(self)
+        font(self) # Cannot be done at the moment
+        font_size(self) # Cannot be done at the moment
+        spacing(self) # Cannot be done at the moment
+        margin(self) # Cannot be done at the moment
+        pg_numbering_errors = page_numbering(self)
+        legibility_neatness(self) # Will do later
 
     def language_translation(self):
         lang = check_document_language(self)
-        if lang!="English":
+        if lang!="en":
             check_translated_document_available(self)
             check_certificate_translation(self)
             check_format_translated(self)
