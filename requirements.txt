@@ -6,4 +6,5 @@ pdf2image
 numpy
 gunicorn
 pymupdf
+PyPDF2
 -e .

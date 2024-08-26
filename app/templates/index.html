@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
+</head>
+<body>
+    <h1>Upload Files</h1>
+    <form method="POST" action="{{ url_for('main.upload_files') }}" enctype="multipart/form-data">
+        <label for="slp">Special Leave Petition:</label>
+        <input type="file" name="slp" id="slp"><br><br>
+        <label for="file2">File 2:</label>
+        <input type="file" name="file2" id="file2"><br><br>
+        <label for="file3">File 3:</label>
+        <input type="file" name="file3" id="file3"><br><br>
+        <button type="submit">Upload Files</button>
+    </form>
+</body>
+</html>
