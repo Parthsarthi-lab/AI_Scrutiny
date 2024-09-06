@@ -1,31 +1,28 @@
 import importlib
 import inspect
 from .Document_scrutinizer import Document
-
+from .vakalatnama.execution import *
 class Vakalatnama(Document):
     def vakalatnama_trigger(self):
-        self.execution()
-        self.memo_appearance()
+        self.vakalatnama_defects = {}
+        self.vakalatnama_defects.update(self.common_defects)
+        self.vakalatnama_defects["Execution & Verification"]=self.execution()
+        
+        
 
     def execution(self):
-        module = importlib.import_module("..nlp.vakalatnama.execution")
+        signature_error = check_signatures_on_vakalatnama(self)
+        adv_welfare_fund_stamp_error = check_advocates_welfare_fund_stamp(self)
+        format_error = check_format_and_compliance(self)
 
-        functions = [func for name, func in inspect.getmembers(module, inspect.isfunction)]
+        if signature_error == {}:
+            signature_error = None
+        if adv_welfare_fund_stamp_error =={}:
+            adv_welfare_fund_stamp_error = None
+        if format_error == {}:
+            format_error = None
+            
+        return [signature_error,adv_welfare_fund_stamp_error,format_error]
 
-        self.results_execution = {}
 
-        for func in functions:
-                result = func(self)
-                self.results_execution[func.__name__] = result
-
-
-    def memo_appearance(self):
-        module = importlib.import_module("..nlp.vakalatnama.memo_appearance")
-
-        functions = [func for name, func in inspect.getmembers(module, inspect.isfunction)]
-
-        self.results_memo_appearance = {}
-
-        for func in functions:
-                result = func(self)
-                self.results_memo_appearance[func.__name__] = result
+    

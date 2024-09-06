@@ -1,3 +1,64 @@
+import spacy
+import re
+import fitz  # PyMuPDF
+import os
+from datetime import datetime
+
+# Load the spaCy English model
+nlp = spacy.load("en_core_web_sm")
+
+def check_form_28(petition):
+    """
+    Check if the petition is filed in Form 28 as required.
+
+    :param petition: The petition object containing all the necessary information and documents.
+    :return: Tuple (boolean, message) indicating whether the petition is filed in Form 28.
+    """
+     # Convert text to lowercase for uniformity
+    text=""
+    for i in petition.text.values():
+        text = text+" "+i
+
+    text = text.lower()
+    print(text)
+     # Define regex patterns for each key component of Form 28
+    patterns = {
+        "title": r"special leave petition.*under article 136 of the constitution of india",
+        "case_information": r"s\.l\.p\. \(criminal\) no\..*\d{4}",
+        "addressing_court": r"to\s+hon'ble the chief justice of india",
+        "introduction": r"petitioner.*submits.*petition.*special leave to appeal",
+        "questions_of_law": r"question[s]?\s+of\s+law",
+        "declaration_rule_4_2": r"declaration.*terms of rule 4\(2\)",
+        "declaration_rule_6": r"declaration.*terms of rule 6",
+        "grounds_for_appeal": r"grounds",
+        "grounds_for_interim_relief": r"grounds for interim relief",
+        "main_prayer": r"main prayer",
+        "interim_relief": r"interim relief",
+        "signatures_verification": r"advocate for the petitioner.*\s+by the order of the court"
+    }
+
+    # Initialize a dictionary to store the check results
+    format_check_results = {}
+
+    # Check each pattern in the text
+    for component, pattern in patterns.items():
+        match = re.search(pattern, text, re.DOTALL)
+        if match:
+            format_check_results[component] = "Found"
+        else:
+            format_check_results[component] = "Not Found or Incorrectly Formatted"
+
+    # Determine if the document follows Form 28 based on the presence of all key components
+    if all(value == "Found" for value in format_check_results.values()):
+        format_check_results["form_28_compliance"] = "The document appears to be written in Form 28 format."
+        return None
+    else:
+        issues_dict = {key: value for key, value in format_check_results.items() if value == "Not Found or Incorrectly Formatted"}
+        return issues_dict
+
+    
+
+
 def check_cause_title(petition):
     """
     Check if the petition includes the correct Cause Title.
@@ -6,6 +67,7 @@ def check_cause_title(petition):
     :return: Tuple (boolean, message) indicating the presence of the Cause Title.
     """
     pass
+    
 
 def check_extra_ordinary_jurisdiction(petition):
     """
@@ -13,15 +75,6 @@ def check_extra_ordinary_jurisdiction(petition):
 
     :param petition: The petition object containing all the necessary information and documents.
     :return: Tuple (boolean, message) indicating whether the correct jurisdiction is invoked.
-    """
-    pass
-
-def check_form_28(petition):
-    """
-    Check if the petition is filed in Form 28 as required.
-
-    :param petition: The petition object containing all the necessary information and documents.
-    :return: Tuple (boolean, message) indicating whether the petition is filed in Form 28.
     """
     pass
 
@@ -34,14 +87,63 @@ def check_accompanied_documents(petition):
     """
     pass
 
-def check_list_of_dates(petition):
+def check_list_of_dates(petition,lod):
     """
     Check if the petition includes a list of dates in chronological order with relevant material facts or events.
 
     :param petition: The petition object containing all the necessary information and documents.
     :return: Tuple (boolean, message) indicating the presence and correctness of the list of dates.
     """
-    pass
+    
+    lod_file_path = petition.list_of_dates_path
+    
+    if lod_file_path is None:
+        return {
+                "issue": "List of Dates not attached",
+                "Rules": "Order XXI Rule 3(1)(b)- Supreme Court Rules 2013"
+                }
+    elif not os.path.exists(lod_file_path) :
+        
+        return {
+                "issue": "List of Dates not attached",
+                "Rules": "Order XXI Rule 3(1)(b)- Supreme Court Rules 2013"
+                }
+    else:
+        date_formats = ["%d.%m.%Y","%Y-%m-%d", "%d-%m-%Y", "%d/%m/%Y", "%Y/%m/%d", "%B %d, %Y", "%d %B %Y"]
+    
+        def is_valid_date(date_string):
+            """Check if the given string is a valid date."""
+            for date_format in date_formats:
+                try:
+                    datetime.strptime(date_string, date_format)
+                    return True
+                except ValueError:
+                    continue
+            return False
+
+        
+        text = ""
+        for content in lod.text.values():
+            text += content
+        # Use regex to find potential date patterns
+        date_pattern = r'\b(?:\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}|\d{4}[-/.]\d{1,2}[-/.]\d{1,2}|\w+ \d{1,2}, \d{4})\b'
+
+        potential_dates = re.findall(date_pattern, content)
+
+        valid_dates = [date for date in potential_dates if is_valid_date(date)]
+        invalid_dates = [date for date in potential_dates if not is_valid_date(date)]
+
+        if valid_dates and not invalid_dates:
+            return None
+        else:
+            return {
+            "issue": "Dates not found",
+                "Rules": "Order XXI Rule 3(1)(b)- Supreme Court Rules 2013"
+            }
+    
+    
+
+
 
 def check_pleadings(petition):
     """

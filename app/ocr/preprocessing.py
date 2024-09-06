@@ -13,7 +13,7 @@ def enhance_image(image_path,doc_type):
     denoised_image = cv2.medianBlur(enhanced_image, 5)
     
     # Find the angle to rotate the image to correct any skew
-    coords = np.column_stack(np.where(denoised_image > 0))
+    """coords = np.column_stack(np.where(denoised_image > 0))
     angle = cv2.minAreaRect(coords)[-1]
     if angle < -45:
         angle = -(90 + angle)
@@ -25,7 +25,7 @@ def enhance_image(image_path,doc_type):
     center = (w // 2, h // 2)
     M = cv2.getRotationMatrix2D(center, angle, 1.0)
     rotated_image = cv2.warpAffine(denoised_image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
-    
+    """
     # Define the processed image path
     processed_image_dir = f"processed_images\\{doc_type}"
     processed_image_name = "processed_" + os.path.basename(image_path)
@@ -36,6 +36,6 @@ def enhance_image(image_path,doc_type):
         os.makedirs(processed_image_dir)
 
     # Save the processed image
-    cv2.imwrite(processed_image_path, rotated_image)
+    cv2.imwrite(processed_image_path, denoised_image)
     
     return processed_image_path

@@ -1,25 +1,29 @@
 import importlib
 import inspect
 from .Document_scrutinizer import Document
+from .annexures.certification import *
 
 class Annexure(Document):
+    
+    def __init__(self,file,translated_file_path=None):
+        self.translated_file_path = translated_file_path
+        super().__init__(file)
+
     def annexure_trigger(self):
-        self.certification()
-        self.indexing_pagination()
-        self.no_of_copies()
+        self.annexure_defects = {}
+        self.annexure_defects.update(self.common_defects)
+        self.annexure_defects["Certification"] = self.certification()
+        #self.indexing_pagination()
+        #self.no_of_copies()
 
     def certification(self):
-        module = importlib.import_module("..nlp.annexures.certification")
+        certification_of_copies = check_certification_of_copies(self)
 
-        functions = [func for name, func in inspect.getmembers(module, inspect.isfunction)]
+        if certification_of_copies == {}:
+             certification_of_copies = None
 
-        self.results_certification= {}
+        return [certification_of_copies]
 
-        for func in functions:
-                result = func(self)
-                self.results_certification[func.__name__] = result
-
-    
     def indexing_pagination(self):
         module = importlib.import_module("..nlp.annexures.indexing_pagination")
 

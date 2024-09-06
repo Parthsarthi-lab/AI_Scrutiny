@@ -3,18 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Upload</title>
+    <title>AI Scrutinizer</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .background-image {
+            background-image: url('home_page_background.png');
+            background-size: cover;
+            background-position: right;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: rgb(0, 0, 0);
+            text-align: center;
+        }
+
+        .heading {
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.85);
+            padding: 30px;
+            border-radius: 10px;
+            width: 50%;
+            max-width: 600px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-container input[type="file"],
+        .form-container button,
+        .form-container label,
+        .form-container input[type="radio"],
+        .form-container input[type="checkbox"] {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        .form-container input[type="file"] {
+            background-color: #f2f2f2;
+            border: 1px solid #ccc;
+        }
+
+        .form-container button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        .form-container button:hover {
+            background-color: #45a049;
+        }
+
+        .form-container label {
+            margin-top: 10px;
+            font-size: 1.1em;
+            color: #333;
+            text-align: left;
+        }
+
+        .form-container input[type="radio"],
+        .form-container input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+            display: inline-block;
+        }
+
+        .translated-section {
+            display: none;
+            margin-top: 10px;
+        }
+    </style>
+
+    <script>
+        function toggleTranslationSection(checkboxId, sectionId) {
+            var checkbox = document.getElementById(checkboxId);
+            var section = document.getElementById(sectionId);
+            section.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        function checkVakalatnama() {
+            var vakalatnama = document.getElementById('vakalatnama').files.length > 0;
+            var powerOfAttorneySection = document.getElementById('power-of-attorney-section');
+            var certificateByAdvocateSection = document.getElementById('certificate-by-advocate-section');
+
+            if (vakalatnama) {
+                powerOfAttorneySection.style.display = 'block';
+                certificateByAdvocateSection.style.display = 'block';
+            } else {
+                powerOfAttorneySection.style.display = 'none';
+                certificateByAdvocateSection.style.display = 'none';
+            }
+        }
+
+        function checkMemoOfAppearance() {
+            var memoOfAppearance = document.getElementById('memo_of_appearance').files.length > 0;
+            var powerOfAttorneyMemoSection = document.getElementById('power-of-attorney-memo-section');
+
+            if (memoOfAppearance) {
+                powerOfAttorneyMemoSection.style.display = 'block';
+            } else {
+                powerOfAttorneyMemoSection.style.display = 'none';
+            }
+        }
+    </script>
+    <script>
+        function addAnnexureTranslationFields() {
+            const annexureContainer = document.getElementById('annexure-container');
+            const annexureCount = annexureContainer.querySelectorAll('.annexure-section').length;
+
+            const annexureSection = document.createElement('div');
+            annexureSection.classList.add('annexure-section');
+            annexureSection.innerHTML = `
+                <label for="annexures[${annexureCount}]">Upload Annexure ${annexureCount + 1}:</label>
+                <input type="file" name="annexures[]" id="annexures[${annexureCount}]">
+                <input type="checkbox" id="annexure_translated_checkbox_${annexureCount}" onclick="toggleTranslationSection('annexure_translated_checkbox_${annexureCount}', 'annexure_translated_section_${annexureCount}')"> Upload translated version
+                <div id="annexure_translated_section_${annexureCount}" class="translated-section">
+                    <label for="annexures_translated[${annexureCount}]">Translated Annexure ${annexureCount + 1}:</label>
+                    <input type="file" name="annexures_translated[]" id="annexures_translated[${annexureCount}]"><br>
+                </div>
+            `;
+
+            annexureContainer.appendChild(annexureSection);
+        }
+
+        function toggleTranslationSection(checkboxId, sectionId) {
+            var checkbox = document.getElementById(checkboxId);
+            var section = document.getElementById(sectionId);
+            section.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('add-annexure').addEventListener('click', addAnnexureTranslationFields);
+        });
+    </script>
 </head>
 <body>
-    <h1>Upload Files</h1>
-    <form method="POST" action="{{ url_for('main.upload_files') }}" enctype="multipart/form-data">
-        <label for="slp">Special Leave Petition:</label>
-        <input type="file" name="slp" id="slp"><br><br>
-        <label for="file2">File 2:</label>
-        <input type="file" name="file2" id="file2"><br><br>
-        <label for="file3">File 3:</label>
-        <input type="file" name="file3" id="file3"><br><br>
-        <button type="submit">Upload Files</button>
-    </form>
+    <div class="background-image">
+        <div class="form-container">
+            <h1 class="heading">AI Scrutinizer</h1>
+            <form method="POST" action="{{ url_for('main.upload_files') }}" enctype="multipart/form-data">
+                
+                <!-- SLP -->
+                <label for="slp">Special Leave Petition:</label>
+                <input type="file" name="slp" id="slp" required>
+                <input type="checkbox" id="slp_translated_checkbox" onclick="toggleTranslationSection('slp_translated_checkbox', 'slp_translated_section')"> Upload translated version
+                <div id="slp_translated_section" class="translated-section">
+                    <label for="slp_translated">Translated SLP:</label>
+                    <input type="file" name="slp_translated" id="slp_translated"><br>
+                </div>
+
+                <!-- List of Dates -->
+                <label for="list_of_dates">Upload List of Dates:</label>
+                <input type="file" name="list_of_dates" id="list_of_dates"><br>
+                <input type="checkbox" id="list_of_dates_translated_checkbox" onclick="toggleTranslationSection('list_of_dates_translated_checkbox', 'list_of_dates_translated_section')"> Upload translated version
+                <div id="list_of_dates_translated_section" class="translated-section">
+                    <label for="list_of_dates_translated">Translated List of Dates:</label>
+                    <input type="file" name="list_of_dates_translated" id="list_of_dates_translated"><br>
+                </div>
+
+                <!-- Affidavit -->
+                <label for="affidavit">Upload Affidavit:</label>
+                <input type="file" name="affidavit" id="affidavit"><br>
+                <input type="checkbox" id="affidavit_translated_checkbox" onclick="toggleTranslationSection('affidavit_translated_checkbox', 'affidavit_translated_section')"> Upload translated version
+                <div id="affidavit_translated_section" class="translated-section">
+                    <label for="affidavit_translated">Translated Affidavit:</label>
+                    <input type="file" name="affidavit_translated" id="affidavit_translated"><br>
+                </div>
+
+                <!-- Vakalatnama -->
+                <label for="vakalatnama">Upload Vakalatnama:</label>
+                <input type="file" name="vakalatnama" id="vakalatnama" onchange="checkVakalatnama()"><br>
+                <input type="checkbox" id="vakalatnama_translated_checkbox" onclick="toggleTranslationSection('vakalatnama_translated_checkbox', 'vakalatnama_translated_section')"> Upload translated version
+                <div id="vakalatnama_translated_section" class="translated-section">
+                    <label for="vakalatnama_translated">Translated Vakalatnama:</label>
+                    <input type="file" name="vakalatnama_translated" id="vakalatnama_translated"><br>
+                </div>
+
+                <div id="power-of-attorney-section" style="display:none;">
+                    <label for="power_of_attorney">Upload Power of Attorney:</label>
+                    <input type="file" name="power_of_attorney" id="power_of_attorney"><br>
+                </div>
+
+                <div id="certificate-by-advocate-section" style="display:none;">
+                    <label for="certificate_by_advocate">Upload Certificate by Advocate:</label>
+                    <input type="file" name="certificate_by_advocate" id="certificate_by_advocate"><br>
+                </div>
+
+                <!-- Memo of Appearance -->
+                <label for="memo_of_appearance">Upload Memo of Appearance:</label>
+                <input type="file" name="memo_of_appearance" id="memo_of_appearance" onchange="checkMemoOfAppearance()"><br>
+                <input type="checkbox" id="memo_translated_checkbox" onclick="toggleTranslationSection('memo_translated_checkbox', 'memo_translated_section')"> Upload translated version
+                <div id="memo_translated_section" class="translated-section">
+                    <label for="memo_translated">Translated Memo of Appearance:</label>
+                    <input type="file" name="memo_translated" id="memo_translated"><br>
+                </div>
+
+                <div id="power-of-attorney-memo-section" style="display:none;">
+                    <label for="power_of_attorney_memo">Upload Power of Attorney (Memo):</label>
+                    <input type="file" name="power_of_attorney_memo" id="power_of_attorney_memo"><br>
+                </div>
+
+                <!-- Annexures -->
+                <div id="annexure-container">
+                    <label>Annexures:</label>
+                    <button type="button" id="add-annexure">Add Annexure</button>
+                </div>
+
+                <!-- Oath of Translator -->
+                <label for="oath_of_translator">Upload Oath of Translator:</label>
+                <input type="file" name="oath_of_translator" id="oath_of_translator"><br>
+
+                <button type="submit">Upload Files</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

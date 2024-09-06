@@ -1,12 +1,33 @@
-def check_declaration_by_advocate_on_record(vakalatnama):
+def check_declaration_by_advocate_on_record(memo):
     """
     Ensure that the vakalatnama consists of a declaration signed by the advocate on-record, stating that he has been authorized, instructed, and engaged to appear, act, and plead for the party.
 
     :param vakalatnama: The vakalatnama document containing the declaration by the advocate on-record.
     :return: Tuple (boolean, message) indicating whether the declaration by the advocate on-record is present and correctly signed.
     """
-    pass
 
+    content =  ""
+    for new in memo.text.values():
+        content+= new
+
+    # List of format checks
+    checks = {
+        "Title": "Memorandum of Appearance through Advocate-on-Record" in content,
+        "Order and Rule": "S.C.R., Order XIX Rule 9" in content,
+        "Jurisdiction": "Appellate Jurisdiction" in content or "Original Jurisdiction" in content,
+        "Case Details": all(keyword in content for keyword in ["Appeal No", "Case", "Appellant", "Plaintiff", "Respondent", "Defendant"]),
+        "Request to Registrar": "Please enter an appearance for the above-named Respondent" in content or "Please enter an appearance for the above-named Defendant" in content,
+        "Date": "Dated this the" in content,
+        "Signature": "(Signed)" in content
+    }
+    
+    # Evaluate results
+    if all(checks.values()):
+        return {}
+    else:
+        missing_parts = [key for key, passed in checks.items() if not passed]
+        return {"issue":"Memo of Appearance does not fit the format",
+                "rules":"Form 9 - Supreme Court Rules 2013"}
 def check_counter_signature_by_party(vakalatnama):
     """
     If the party has personally authorized the Advocate-on-Record, verify that the memo of appearance is counter-signed by the party.

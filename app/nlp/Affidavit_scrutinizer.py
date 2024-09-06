@@ -1,48 +1,39 @@
 import importlib
 import inspect
 from .Document_scrutinizer import Document
-
+from ..nlp.affidavits.execution_verification import *
+from ..nlp.affidavits.filing_requirements import *
 class Affidavit(Document):
     def affidavit_trigger(self):
-        self.execution_verification()
-        self.filing_requirements()
-        self.filing_requirements()
-        self.lang_translation()
+        self.affidavit_defects = {}
+        self.affidavit_defects.update(self.common_defects)
+        self.affidavit_defects["Execution & Verification"]=self.execution_verification()
+        self.affidavit_defects["Filing Requirements"] = self.filing_requirements()
+        
+        #self.lang_translation()
 
     def execution_verification(self):
-        module = importlib.import_module("..nlp.affidavits.execution_verification")
+        heading = check_heading_and_filing(self)
+        content = check_structure_content(self)
+        signature_swearing = check_signing_and_swearing(self)
 
-        functions = [func for name, func in inspect.getmembers(module, inspect.isfunction)]
-
-        self.results_execution = {}
-
-        for func in functions:
-                result = func(self)
-                self.results_execution[func.__name__] = result
+        if heading == {}:
+            heading = None
+        if signature_swearing == {}:
+            signature_swearing = None
+        if content =={}:
+            content = None
+        
+        return [heading,content,signature_swearing]
 
     def filing_requirements(self):
-        module = importlib.import_module("..nlp.affidavits.filing_requirements")
+        time_mention = check_time(self)
 
-        functions = [func for name, func in inspect.getmembers(module, inspect.isfunction)]
+        if time_mention =={}:
+            time_mention = None
+        return [time_mention]
 
-        self.results_filing_requirements = {}
-
-        for func in functions:
-                result = func(self)
-                self.results_filing_requirements[func.__name__] = result
-
-    def lang_translation(self):
-        module = importlib.import_module("..nlp.affidavits.lang_translation")
-
-        functions = [func for name, func in inspect.getmembers(module, inspect.isfunction)]
-
-        self.results_lang_translation = {}
-
-        for func in functions:
-                result = func(self)
-                self.results_lang_translation[func.__name__] = result
-
-    def supporting_docs(self):
+    """def supporting_docs(self):
         module = importlib.import_module("..nlp.affidavits.supporting_docs")
 
         functions = [func for name, func in inspect.getmembers(module, inspect.isfunction)]
@@ -51,4 +42,4 @@ class Affidavit(Document):
 
         for func in functions:
                 result = func(self)
-                self.results_supporting_docs[func.__name__] = result
+                self.results_supporting_docs[func.__name__] = result"""
